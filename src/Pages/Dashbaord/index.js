@@ -18,6 +18,7 @@ import {
   Legend,
 } from "chart.js";
 import { Bar } from "react-chartjs-2";
+import axios from "axios";
 
 ChartJS.register(
   CategoryScale,
@@ -35,16 +36,15 @@ function Dashboard() {
   const [revenue, setRevenue] = useState(0);
 
   useEffect(() => {
-    getOrders().then((res) => {
-      setOrders(res.total);
-      setRevenue(res.discountedTotal);
-    });
-    getInventory().then((res) => {
-      setInventory(res.total);
-    });
-    getCustomers().then((res) => {
-      setCustomers(res.total);
-    });
+
+    axios.get("/user")
+      .then(res => {
+        console.log("user", res.data)
+      })
+      .catch(err => {
+        console.log("Error", err)
+      })
+
   }, []);
 
   return (
