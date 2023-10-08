@@ -1,6 +1,8 @@
 import AppRoutes from "../AppRoutes";
 
-function PageContent() {
+function PageContent(props) {
+
+
   return (
     <div className="PageContent">
       <AppRoutes />
