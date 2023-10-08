@@ -1,0 +1,56 @@
+/* Login Container Styles */
+.auth-form-container {
+    max-width: 400px;
+    margin: 0 auto;
+    padding: 20px;
+    border: 1px solid #ccc;
+    background-color: #fff;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+}
+
+/* Login Form Styles */
+.login-form {
+    display: flex;
+    flex-direction: column;
+}
+
+.login-form label {
+    font-size: 16px;
+    margin-bottom: 5px;
+    color: #333;
+}
+
+.login-form input {
+    padding: 10px;
+    margin-bottom: 15px;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    font-size: 16px;
+}
+
+.login-form button {
+    background-color: #0073e6;
+    color: #fff;
+    padding: 10px;
+    border: none;
+    border-radius: 3px;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+.login-form button:hover {
+    background-color: #005bbd;
+}
+
+/* Link Button Styles */
+.link-btn {
+    margin-top: 10px;
+    color: #0073e6;
+    cursor: pointer;
+    text-decoration: underline;
+}
+
+.link-btn:hover {
+    color: #005bbd;
+}
