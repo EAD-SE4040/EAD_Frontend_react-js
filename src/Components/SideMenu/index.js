@@ -7,8 +7,10 @@ import {
 import { Menu } from "antd";
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import { useUser } from "../commonData";
 
 function SideMenu() {
+  const {user, setUser} = useUser()
   const location = useLocation();
   const [selectedKeys, setSelectedKeys] = useState("/");
 
@@ -25,16 +27,29 @@ function SideMenu() {
         mode="vertical"
         onClick={(item) => {
           //item.key
+          if(item.key ==="/logout"){
+            setUser({
+              isAuthenticated: false,
+              id:'',
+              name:'',
+              email:'',
+              nic:'',
+              phone:'',
+              userType:'',
+              isActive:''
+            });
+            const isLogin= false
+            localStorage.setItem("Login", isLogin);
+          }
           navigate(item.key);
         }}
         selectedKeys={[selectedKeys]}
         items={[
           {
-            label: "Dashbaord",
+            label: "Dashboard",
             icon: <AppstoreOutlined />,
             key: "/",
           },
-
           {
             label: "Trains management",
             key: "/train",
@@ -44,6 +59,7 @@ function SideMenu() {
             label: "User management",
             key: "/user",
             icon: <UserOutlined />,
+            hidden: user.userType === "traveler agent" || user.userType === "Traveler agent",
           },
           {
             label: "Reservation Management",
@@ -55,7 +71,7 @@ function SideMenu() {
             key: "/logout",
             icon: <LogoutOutlined />,
           },
-        ]}
+        ].filter((item) => !item.hidden)}
       />
     </div>
   );
