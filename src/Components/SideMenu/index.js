@@ -37,12 +37,17 @@ function SideMenu() {
 
           {
             label: "Trains management",
-            key: "/orders",
+            key: "/train",
             icon: <ShoppingCartOutlined />,
           },
           {
-            label: "user management",
-            key: "/customers",
+            label: "User management",
+            key: "/user",
+            icon: <UserOutlined />,
+          },
+          {
+            label: "Reservation Management",
+            key: "/reservation",
             icon: <UserOutlined />,
           },
           {
