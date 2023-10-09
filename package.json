@@ -2,6 +2,7 @@
   "name": "antd-demo",
   "version": "0.1.0",
   "private": true,
+  "proxy": "https://localhost:7064/api",
   "dependencies": {
     "@ant-design/icons": "^4.8.0",
     "@emotion/react": "^11.11.1",
@@ -19,7 +20,7 @@
     "react": "^18.2.0",
     "react-chartjs-2": "^5.2.0",
     "react-dom": "^18.2.0",
-    "react-router-dom": "^6.4.3",
+    "react-router-dom": "^6.16.0",
     "react-scripts": "5.0.1",
     "web-vitals": "^2.1.4"
   },
