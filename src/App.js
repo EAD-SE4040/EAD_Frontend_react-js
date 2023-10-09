@@ -4,17 +4,20 @@ import AppFooter from "./Components/AppFooter";
 import AppHeader from "./Components/AppHeader";
 import PageContent from "./Components/PageContent";
 import SideMenu from "./Components/SideMenu";
+import { useUser } from "./Components/commonData";
+import Login from "./Pages/Login/Login";
 
-function App(props) {
-
-  const [isLogin, setIsLogin] = useState(false)
+function App() {
+  const { user, setUser } = useUser();
+  const storedLogin = localStorage.getItem("Login");
+  console.log(storedLogin)
   return (
     <div className="App">
       <AppHeader />
-      <div className="SideMenuAndPageContent">
+      {storedLogin === "true" ? <div className="SideMenuAndPageContent">
         <SideMenu />
         <PageContent />
-      </div>
+      </div> : <Login/>}
       <AppFooter />
     </div>
   );
