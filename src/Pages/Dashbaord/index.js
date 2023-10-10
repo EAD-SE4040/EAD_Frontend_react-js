@@ -39,7 +39,7 @@ function Dashboard() {
 
     axios.get("/user")
       .then(res => {
-        console.log("user", res.data)
+        // console.log("user", res.data)
       })
       .catch(err => {
         console.log("Error", err)

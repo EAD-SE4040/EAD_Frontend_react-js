@@ -9,12 +9,11 @@ import Login from "./Pages/Login/Login";
 
 function App() {
   const { user, setUser } = useUser();
-  const storedLogin = localStorage.getItem("Login");
-  console.log(storedLogin)
+  const userData = JSON.parse(localStorage.getItem('user'))
   return (
     <div className="App">
       <AppHeader />
-      {storedLogin === "true" ? <div className="SideMenuAndPageContent">
+      {userData ? <div className="SideMenuAndPageContent">
         <SideMenu />
         <PageContent />
       </div> : <Login/>}
