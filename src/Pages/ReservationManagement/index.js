@@ -6,13 +6,18 @@ import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
-import { Box, DialogActions, Button, DialogContent, DialogContentText, DialogTitle, Dialog, Radio, FormControlLabel, RadioGroup, FormLabel, FormControl } from '@mui/material';
+import { Box, DialogActions, Button, DialogContent, DialogContentText, DialogTitle, Dialog, Avatar, TextField } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import DescriptionAlerts from '../../Components/AlertMsg/Alert';
-import ChangeCircleIcon from '@mui/icons-material/ChangeCircle';
+import EditIcon from '@mui/icons-material/Edit';
+import { DemoContainer, DemoItem } from '@mui/x-date-pickers/internals/demo';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
+import dayjs from 'dayjs';
 
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
@@ -35,31 +40,77 @@ const StyledTableRow = styled(TableRow)(({ theme }) => ({
   },
 }));
 
-const ReservationManagement = () => {
+const TrainManagement = () => {
   const navigate = useNavigate()
   const [open, setOpen] = useState(false);
-  const [newType, setNewType] = useState('')
+  const [AddOpen, setAddOpen] = useState(false);
   const [deleteId, setDeleteId] = useState('')
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [openSnackbar, setOpenSnackbar] = useState(false);
   const [severity, setSeverity] = useState('')
   const [alertMessage, setAlertMessage] = useState('')
-  const [selectedUser, setSelectedUser] = useState([])
-  const [users, setUsers] = useState([])
+  const [selectedTrain, setSelectedTrain] = useState([])
+  const [trains, setTrains] = useState([])
+  const [updatedName, setUpdatedName] = useState('')
+  const [updatedScheduleDateTime, setUpdatedScheduleDateTime] = useState('')
+  const [updatedSeatsCount, setUpdatedSeatsCount] = useState('')
+  const [updatedFrom, setUpdatedFrom] = useState('')
+  const [updatedTo, setUpdatedTo] = useState('')
+  const [newTrainName, setNewTrainName] = useState('')
+  const [newTrainScheduleDateTime, setNewTrainScheduleDateTime] = useState('')
+  const [newTrainSeatCount, setNewTrainSeatCount] = useState('')
+  const [newTrainFrom, setNewTrainFrom] = useState('')
+  const [newTrainTo, setNewTrainTo] = useState('')
+
 
   useEffect(() => {
-    axios.get(`https://localhost:7064/api/user`)
+    axios.get(`https://localhost:7064/api/trains`)
       .then((res) => {
-        setUsers(res.data)
+        setTrains(res.data)
       })
   }, [])
+
+  const handleUpdatedName = (e) => {
+    setUpdatedName(e.target.value)
+  }
+
+  const handleScheduleDateTime = (newDate) => {
+    if (newDate) {
+      const formattedDate = newDate.format('YYYY-MM-DDTHH:mm:ss');
+      setUpdatedScheduleDateTime(formattedDate);
+    }
+  }
+
+  const handleNewTrainScheduleDateTime = (newDate) => {
+    if (newDate) {
+      const formattedDate = newDate.format('YYYY-MM-DDTHH:mm:ss');
+      setNewTrainScheduleDateTime(formattedDate);
+    }
+  }
+
+  const handleSeatCount = (e) => {
+    setUpdatedSeatsCount(e.target.value)
+  }
+
+  const handleFrom = (e) => {
+    setUpdatedFrom(e.target.value)
+  }
+
+  const handleTo = (e) => {
+    setUpdatedTo(e.target.value)
+  }
 
   const handleCloseSnackbar = () => {
     setOpenSnackbar(false);
   };
 
-  const editButtonClicked = (user) => {
-    setSelectedUser(user)
+  const editButtonClicked = (train) => {
+    setSelectedTrain(train)
+    setUpdatedName(train.trainName)
+    setUpdatedScheduleDateTime(train.scheduleDateTime)
+    setUpdatedSeatsCount(train.seatsCount)
+    setUpdatedFrom(train.from)
+    setUpdatedTo(train.to)
     handleClickOpen()
   }
 
@@ -67,10 +118,22 @@ const ReservationManagement = () => {
     setOpen(true);
   };
 
+  const handleClickAddOpen = () => {
+    setAddOpen(true);
+  };
+
   const handleClose = () => {
     setOpen(false);
-    setNewType('')
-    setSelectedUser([])
+    setNewTrainName('')
+    setNewTrainScheduleDateTime('')
+    setNewTrainSeatCount('')
+    setNewTrainFrom('')
+    setNewTrainTo('')
+  };
+
+  const handleAddClose = () => {
+    setAddOpen(false);
+    setSelectedTrain([])
   };
 
   const handleOpenDelete = () => {
@@ -92,31 +155,63 @@ const ReservationManagement = () => {
     }
   }, [deleteId])
 
-  const handleType = (e) => {
-    setNewType(e.target.value)
-  }
-
   const handleUpdate = () => {
-    axios.put(`https://localhost:7064/api/user/${selectedUser.id}`, {
-      id:selectedUser.id,
-      name:selectedUser.name,
-      password: selectedUser.password,
-      email: selectedUser.email,
-      nic: selectedUser.nic,
-      phone: selectedUser.phone,
-      userType: newType,
-      isActive:selectedUser.isActive
+    console.log(selectedTrain)
+    axios.put(`https://localhost:7064/api/trains/${selectedTrain.id}`, {
+      id: selectedTrain.id,
+      trainName: updatedName,
+      scheduleDateTime: updatedScheduleDateTime,
+      seatsCount: parseInt(updatedSeatsCount),
+      from: updatedFrom,
+      to: updatedTo,
     })
       .then((response) => {
         console.log(response)
+        setSelectedTrain([])
+        setUpdatedName("")
+        setUpdatedScheduleDateTime("")
+        setUpdatedSeatsCount("")
+        setUpdatedFrom("")
+        setUpdatedTo("")
         handleClose()
-        setNewType('')
-        setSelectedUser([])
         setSeverity('success')
-        setAlertMessage('User Type has been changed successfully')
+        setAlertMessage('Updated sucessfully')
         setOpenSnackbar(true);
       }).catch((err) => {
         console.log(err)
+        setSeverity('error')
+        setAlertMessage(err.response.data)
+        setOpenSnackbar(true);
+        if (err.response.status === 401) {
+          navigate('/')
+        }
+      })
+  }
+
+  const handleAdd = () => {
+    console.log(selectedTrain)
+    axios.post(`https://localhost:7064/api/trains`, {
+      trainName: newTrainName,
+      scheduleDateTime: newTrainScheduleDateTime,
+      seatsCount: parseInt(newTrainSeatCount),
+      from: newTrainFrom,
+      to: newTrainTo,
+    })
+      .then((response) => {
+        setNewTrainName('')
+        setNewTrainScheduleDateTime('')
+        setNewTrainSeatCount('')
+        setNewTrainFrom('')
+        setNewTrainTo('')
+        handleAddClose()
+        setSeverity('success')
+        setAlertMessage('Added sucessfully')
+        setOpenSnackbar(true);
+      }).catch((err) => {
+        console.log(err)
+        setSeverity('error')
+        setAlertMessage(err.response.data.errors.train)
+        setOpenSnackbar(true);
         if (err.response.status === 401) {
           navigate('/')
         }
@@ -124,18 +219,16 @@ const ReservationManagement = () => {
   }
 
   const handleDelete = () => {
-    axios.delete(`https://localhost:7064/api/user/${deleteId}`)
+    axios.delete(`https://localhost:7064/api/trains/${deleteId}`)
       .then((response) => {
         setDeleteId(false)
         handleCloseDelete()
         setSeverity('success')
         setAlertMessage('Deleted sucessfully')
         setOpenSnackbar(true);
-        // setTimeout(() => {history.replace("/index");}, 5000);
       }).catch((err) => {
-        console.log(err)
         setSeverity('error')
-        setAlertMessage(err.response.data.message)
+        setAlertMessage(err.response.data)
         setOpenSnackbar(true);
         if (err.response.status === 401) {
           navigate('/')
@@ -143,72 +236,53 @@ const ReservationManagement = () => {
       })
   }
 
-  const editUserStatus = (user) => {
-    user.isActive = !user.isActive
-    console.log(user)
-    axios.put(`https://localhost:7064/api/user/${user.id}`,{
-      id:user.id,
-      name:user.name,
-      password: user.password,
-      email: user.email,
-      nic: user.nic,
-      phone: user.phone,
-      userType: user.userType,
-      isActive:user.isActive
-    }).then((res)=>{
-      setSeverity('success')
-      setAlertMessage(`Account has been ${user.isActive ? "activated" : "deacivated"} successfully`)
-      setOpenSnackbar(true);
-    })
-  }
-
   return (
     <Box>
+      <Button sx={{ mt:'30px', ml:'30px',color: 'white', textTransform: 'capitalize', backgroundColor:'black', ':hover': { backgroundColor: '#90EE90'} }}
+        onClick={() => handleClickAddOpen()}>
+        Add new train
+      </Button>
       <DescriptionAlerts openSnackbar={openSnackbar} handleCloseSnackbar={handleCloseSnackbar} severity={severity} alertMessage={alertMessage} />
       <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', mt: '30px', mb: '30px', ml: '30px', mr: '30px' }}>
         <TableContainer component={Paper} align='center'>
           <Table sx={{ minWidth: 700 }} aria-label="customized table">
             <TableHead>
               <TableRow>
-                <StyledTableCell>Name</StyledTableCell>
-                <StyledTableCell align="left">Email</StyledTableCell>
-                <StyledTableCell align="left">NIC</StyledTableCell>
-                <StyledTableCell align="left">Phone Number</StyledTableCell>
-                <StyledTableCell align="left">UserType</StyledTableCell>
+                <StyledTableCell>TrainName</StyledTableCell>
+                <StyledTableCell align="left">ScheduleDateTime</StyledTableCell>
+                <StyledTableCell align="left">SeatsCount</StyledTableCell>
+                <StyledTableCell align="left">From</StyledTableCell>
+                <StyledTableCell align="left">To</StyledTableCell>
                 <StyledTableCell align="left">Status</StyledTableCell>
                 <StyledTableCell align="letf">Delete</StyledTableCell>
               </TableRow>
             </TableHead>
             <TableBody>
-              {users.map((user) => (
-                <StyledTableRow key={user.id} sx={{
+              {trains.map((train) => (
+                <StyledTableRow key={train.id} sx={{
                   ":hover": { backgroundColor: '#666' }, "&.custom-row": {
-                    backgroundColor: user.isActive ? '#90EE90' : '#FF5733',
                   },
                 }}
                   className="custom-row">
                   <StyledTableCell component="th" scope="row">
-                    {user.name}
+                    {train.trainName}
                   </StyledTableCell>
                   <StyledTableCell component="th" scope="row">
-                    {user.email}
+                    {train.scheduleDateTime}
                   </StyledTableCell>
                   <StyledTableCell component="th" scope="row">
-                    {user.nic}
+                    {train.seatsCount}
                   </StyledTableCell>
                   <StyledTableCell component="th" scope="row">
-                    {user.phone}
+                    {train.from}
                   </StyledTableCell>
                   <StyledTableCell component="th" scope="row">
-                    <Button sx={{ color: 'black', textTransform: 'capitalize', ':hover': { backgroundColor: 'black', color: 'white' } }}
-                      onClick={() => editButtonClicked(user)}>
-                      {user.userType}
-                    </Button>
+                    {train.to}
                   </StyledTableCell>
                   <StyledTableCell component="th" scope="row">
                     <Button sx={{ color: 'black', textTransform: 'capitalize', ':hover': { backgroundColor: 'black', color: 'white' } }}
-                      onClick={() => editUserStatus(user)}>
-                      <ChangeCircleIcon/>
+                      onClick={() => editButtonClicked(train)}>
+                      <EditIcon />
                     </Button>
                   </StyledTableCell>
                   <StyledTableCell component="th" scope="row"><DeleteIcon sx={{
@@ -219,7 +293,7 @@ const ReservationManagement = () => {
                       backgroundColor: 'black',
                       color: 'white'
                     }
-                  }} onClick={() => deleteButtonClicked(user.id)} /></StyledTableCell>
+                  }} onClick={() => deleteButtonClicked(train.id)} /></StyledTableCell>
                 </StyledTableRow>
               ))}
             </TableBody>
@@ -230,26 +304,83 @@ const ReservationManagement = () => {
 
       <Box>
         <Dialog open={open} onClose={handleClose}>
-          <DialogTitle sx={{ backgroundColor: 'black', color: 'white', textAlign: 'center' }}>Update UserType</DialogTitle>
+          <DialogTitle sx={{ backgroundColor: 'black', color: 'white', textAlign: 'center' }}>Update Train</DialogTitle>
           <DialogContent sx={{ mt: '10px' }}>
-            <FormControl sx={{ mt: '10px' }}>
-              <FormLabel id="radio-buttons-group-label">Types</FormLabel>
-              <RadioGroup
-                onChange={handleType}
-                defaultValue={selectedUser.status}
+            <DialogContentText >
+              <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                <Avatar
+                  alt=""
+                  src={updatedScheduleDateTime}
+                  sx={{ width: 90, height: 90, backgroundColor: 'black', position: 'top' }}
+                />
+              </Box>
+            </DialogContentText>
+            <TextField
+              autoFocus
+              margin="dense"
+              id="name"
+              label="Train name"
+              type="text"
+              fullWidth
+              variant="standard"
+              defaultValue={updatedName}
+              onChange={handleUpdatedName}
+            />
+            <LocalizationProvider dateAdapter={AdapterDayjs}>
+              <DemoContainer
+                components={['DateTimePicker', 'DateTimePicker', 'DateTimePicker']}
               >
-                <FormControlLabel value={'traveler'} control={<Radio />} label='Traveler' />
-                <FormControlLabel value={'user'} control={<Radio />} label='User' />
-                <FormControlLabel value={'traveler agent'} control={<Radio />} label='Traveler agent' />
-                <FormControlLabel value={'backofficer'} control={<Radio />} label='Backofficer' />
-              </RadioGroup>
-            </FormControl>
+                <DemoItem
+                  label="Pick the date and time"
+                >
+                  <DateTimePicker
+                    defaultValue={dayjs(updatedScheduleDateTime)}
+                    onChange={(newDate) => handleScheduleDateTime((newDate))}
+                    views={['year', 'month', 'day', 'hours', 'minutes', 'seconds']}
+                  />
+                </DemoItem>
+              </DemoContainer>
+            </LocalizationProvider>
+
+            <TextField
+              autoFocus
+              margin="dense"
+              id="email"
+              label="Seat count"
+              type="text"
+              fullWidth
+              variant="standard"
+              defaultValue={updatedSeatsCount}
+              onChange={handleSeatCount}
+            />
+            <TextField
+              autoFocus
+              margin="dense"
+              id="email"
+              label="From"
+              type="text"
+              fullWidth
+              variant="standard"
+              defaultValue={updatedFrom}
+              onChange={handleFrom}
+            />
+            <TextField
+              autoFocus
+              margin="dense"
+              id="email"
+              label="To"
+              type="text"
+              fullWidth
+              variant="standard"
+              defaultValue={updatedTo}
+              onChange={handleTo}
+            />
           </DialogContent>
           <DialogActions>
             <Button
               sx={{
                 backgroundColor: 'black',
-                width: '30%',
+                width: '50%',
                 color: 'white',
                 ":hover": {
                   backgroundColor: 'red',
@@ -261,7 +392,7 @@ const ReservationManagement = () => {
               sx={{
                 backgroundColor: 'black',
                 color: 'white',
-                width: '70%',
+                width: '50%',
                 ":hover": {
                   backgroundColor: '#50C878',
                   color: 'white',
@@ -269,7 +400,105 @@ const ReservationManagement = () => {
                 },
               }}
               onClick={handleUpdate}
-            >Update Type</Button>
+            >Update</Button>
+          </DialogActions>
+        </Dialog>
+      </Box>
+
+      <Box>
+        <Dialog open={AddOpen} onClose={handleAddClose}>
+          <DialogTitle sx={{ backgroundColor: 'black', color: 'white', textAlign: 'center' }}>Add New Train</DialogTitle>
+          <DialogContent sx={{ mt: '10px' }}>
+            <DialogContentText >
+              <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                <Avatar
+                  alt=""
+                  src={updatedScheduleDateTime}
+                  sx={{ width: 90, height: 90, backgroundColor: 'black', position: 'top' }}
+                />
+              </Box>
+            </DialogContentText>
+            <TextField
+              autoFocus
+              margin="dense"
+              id="name"
+              label="Train name"
+              type="text"
+              fullWidth
+              variant="standard"
+              onChange={(e)=>{setNewTrainName(e.target.value)}}
+            />
+            <LocalizationProvider dateAdapter={AdapterDayjs}>
+              <DemoContainer
+                components={['DateTimePicker', 'DateTimePicker', 'DateTimePicker']}
+              >
+                <DemoItem
+                  label="Pick the date and time"
+                >
+                  <DateTimePicker
+                    onChange={(newDate) => handleNewTrainScheduleDateTime((newDate))}
+                    views={['year', 'month', 'day', 'hours', 'minutes', 'seconds']}
+                  />
+                </DemoItem>
+              </DemoContainer>
+            </LocalizationProvider>
+
+            <TextField
+              autoFocus
+              margin="dense"
+              id="email"
+              label="Seat count"
+              type="text"
+              fullWidth
+              variant="standard"
+              onChange={(e)=>{setNewTrainSeatCount(e.target.value)}}
+            />
+            <TextField
+              autoFocus
+              margin="dense"
+              id="email"
+              label="From"
+              type="text"
+              fullWidth
+              variant="standard"
+              onChange={(e)=>{setNewTrainFrom(e.target.value)}}
+            />
+            <TextField
+              autoFocus
+              margin="dense"
+              id="email"
+              label="To"
+              type="text"
+              fullWidth
+              variant="standard"
+              onChange={(e)=>{setNewTrainTo(e.target.value)}}
+            />
+          </DialogContent>
+          <DialogActions>
+            <Button
+              sx={{
+                backgroundColor: 'black',
+                width: '50%',
+                color: 'white',
+                ":hover": {
+                  backgroundColor: 'red',
+                  color: 'white',
+                  cursor: 'pointer'
+                },
+              }} onClick={handleClose}>Cancel</Button>
+            <Button
+              sx={{
+                backgroundColor: 'black',
+                color: 'white',
+                width: '50%',
+                ":hover": {
+                  backgroundColor: '#50C878',
+                  color: 'white',
+                  cursor: 'pointer'
+                },
+              }}
+              onClick={handleAdd}
+            >Add</Button>
           </DialogActions>
         </Dialog>
       </Box>
@@ -320,4 +549,4 @@ const ReservationManagement = () => {
 }
 
 
-export default ReservationManagement
+export default TrainManagement
