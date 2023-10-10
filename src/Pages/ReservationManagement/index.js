@@ -18,6 +18,8 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
 import dayjs from 'dayjs';
+import { useUser } from '../../Components/commonData';
+import ChangeCircleIcon from '@mui/icons-material/ChangeCircle';
 
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
@@ -41,6 +43,8 @@ const StyledTableRow = styled(TableRow)(({ theme }) => ({
 }));
 
 const TrainManagement = () => {
+
+  const { train, setTrain } = useUser()
   const navigate = useNavigate()
   const [open, setOpen] = useState(false);
   const [AddOpen, setAddOpen] = useState(false);
@@ -49,29 +53,55 @@ const TrainManagement = () => {
   const [openSnackbar, setOpenSnackbar] = useState(false);
   const [severity, setSeverity] = useState('')
   const [alertMessage, setAlertMessage] = useState('')
-  const [selectedTrain, setSelectedTrain] = useState([])
-  const [trains, setTrains] = useState([])
-  const [updatedName, setUpdatedName] = useState('')
+  const [selectedReservation, setSelectedReservation] = useState([])
+  const [reservations, setReservations] = useState([])
+  const [updatedUserId, setUpdatedUserId] = useState('')
   const [updatedScheduleDateTime, setUpdatedScheduleDateTime] = useState('')
   const [updatedSeatsCount, setUpdatedSeatsCount] = useState('')
-  const [updatedFrom, setUpdatedFrom] = useState('')
-  const [updatedTo, setUpdatedTo] = useState('')
-  const [newTrainName, setNewTrainName] = useState('')
-  const [newTrainScheduleDateTime, setNewTrainScheduleDateTime] = useState('')
-  const [newTrainSeatCount, setNewTrainSeatCount] = useState('')
-  const [newTrainFrom, setNewTrainFrom] = useState('')
-  const [newTrainTo, setNewTrainTo] = useState('')
-
+  const [updatedStatus, setUpdatedStatus] = useState('')
+  const [updatedNIC, setUpdatedNIC] = useState('')
+  const [reservationTrainId, setReservationTrainId] = useState('')
+  const [reservationDateAndTime, setReservationDateAndTime] = useState('')
+  const [reserveSeatCount, setReserveSeatCount] = useState(1)
+  const [reserveUserId, setReserveUserId] = useState('')
+  const [reserveNic, setReserveNic] = useState('')
+  const [oldBooking, setOldBooking] = useState('')
+  const [bookedSeatCount, setBookedSeatCount] = useState('')
 
   useEffect(() => {
-    axios.get(`https://localhost:7064/api/trains`)
+    axios.get(`https://localhost:7064/api/reservation`)
       .then((res) => {
-        setTrains(res.data)
-      })
+        setReservations(res.data)
+      }, [])
+
+      const userData = JSON.parse(localStorage.getItem('user'))
+      if (userData){
+        console.log(userData)
+        setReserveUserId(userData.id)
+      }
+
+    if (train.isCreateTrain) {
+      setReservationTrainId(train.id)
+      setReservationDateAndTime(train.scheduleDateTime)
+      handleClickAddOpen()
+      axios.get(`https://localhost:7064/bookings/train/${train.id}`)
+        .then((res) => {
+          const bookingsData = res.data;
+          setOldBooking(bookingsData);
+
+          // Filter bookings with booking.status === true
+          const filteredBookings = bookingsData.filter((booking) => booking.status === true);
+
+          // Calculate the sum of noOfSeates for filtered bookings
+          const totalSeats = filteredBookings.reduce((acc, booking) => acc + booking.noOfSeates, 0);
+
+          setBookedSeatCount(totalSeats)
+        })
+    }
   }, [])
 
   const handleUpdatedName = (e) => {
-    setUpdatedName(e.target.value)
+    setUpdatedUserId(e.target.value)
   }
 
   const handleScheduleDateTime = (newDate) => {
@@ -84,7 +114,7 @@ const TrainManagement = () => {
   const handleNewTrainScheduleDateTime = (newDate) => {
     if (newDate) {
       const formattedDate = newDate.format('YYYY-MM-DDTHH:mm:ss');
-      setNewTrainScheduleDateTime(formattedDate);
+      setReservationDateAndTime(formattedDate);
     }
   }
 
@@ -93,24 +123,25 @@ const TrainManagement = () => {
   }
 
   const handleFrom = (e) => {
-    setUpdatedFrom(e.target.value)
+    setUpdatedStatus(e.target.value)
   }
 
   const handleTo = (e) => {
-    setUpdatedTo(e.target.value)
+    setUpdatedNIC(e.target.value)
   }
 
   const handleCloseSnackbar = () => {
     setOpenSnackbar(false);
   };
 
-  const editButtonClicked = (train) => {
-    setSelectedTrain(train)
-    setUpdatedName(train.trainName)
-    setUpdatedScheduleDateTime(train.scheduleDateTime)
-    setUpdatedSeatsCount(train.seatsCount)
-    setUpdatedFrom(train.from)
-    setUpdatedTo(train.to)
+  const editButtonClicked = (reservation) => {
+
+    setUpdatedUserId(reservation.trainName)
+    // setUpdatedScheduleDateTime(reservation.scheduleDateTime)
+    // setUpdatedStatus(reservation.from)
+    setSelectedReservation(reservation)
+    setUpdatedSeatsCount(reservation.noOfSeates)
+    setUpdatedNIC(reservation.nic)
     handleClickOpen()
   }
 
@@ -120,20 +151,35 @@ const TrainManagement = () => {
 
   const handleClickAddOpen = () => {
     setAddOpen(true);
+
   };
 
   const handleClose = () => {
     setOpen(false);
-    setNewTrainName('')
-    setNewTrainScheduleDateTime('')
-    setNewTrainSeatCount('')
-    setNewTrainFrom('')
-    setNewTrainTo('')
+    setReservationTrainId('')
+    setReservationDateAndTime('')
+    setReserveSeatCount('')
+    setReserveUserId('')
+    setReserveNic('')
   };
 
   const handleAddClose = () => {
+    setTrain({
+      isCreateTrain: false,
+      id: "",
+      trainName: "",
+      scheduleDateTime: "",
+      seatsCount: "",
+      from: "",
+      to: ""
+    })
+    setReserveUserId('')
+    setReservationTrainId('')
+    setReservationDateAndTime('')
+    setReserveSeatCount('')
+    setReserveUserId('')
+    setReserveNic('')
     setAddOpen(false);
-    setSelectedTrain([])
   };
 
   const handleOpenDelete = () => {
@@ -155,32 +201,48 @@ const TrainManagement = () => {
     }
   }, [deleteId])
 
+  const availableSeats = () => {
+    return train.seatsCount - bookedSeatCount
+  }
+
+  const updatedAvailableSeat = ()=>{
+      // return train.seatsCount - bookedSeatCount
+  }
   const handleUpdate = () => {
-    console.log(selectedTrain)
-    axios.put(`https://localhost:7064/api/trains/${selectedTrain.id}`, {
-      id: selectedTrain.id,
-      trainName: updatedName,
-      scheduleDateTime: updatedScheduleDateTime,
-      seatsCount: parseInt(updatedSeatsCount),
-      from: updatedFrom,
-      to: updatedTo,
+    // const available = updatedAvailableSeat()
+    // console.log(available)
+    // if (available < reserveSeatCount) {
+    //   setSeverity('info')
+    //   setAlertMessage(`Sorry! maximum available seat count is ${available}`)
+    //   setOpenSnackbar(true);
+    // }
+    console.log(selectedReservation)
+    axios.put(`https://localhost:7064/api/reservation/${selectedReservation.id}`, {
+      id:selectedReservation.id,
+      userID: selectedReservation.userID,
+      trainID: selectedReservation.trainID,
+      nic: updatedNIC,
+      trainName: selectedReservation.trainName,
+      reservationDate: selectedReservation.reservationDate,
+      noOfSeates: parseInt(updatedSeatsCount),
+      status: true
     })
       .then((response) => {
         console.log(response)
-        setSelectedTrain([])
-        setUpdatedName("")
+        setSelectedReservation([])
+        setUpdatedUserId("")
         setUpdatedScheduleDateTime("")
         setUpdatedSeatsCount("")
-        setUpdatedFrom("")
-        setUpdatedTo("")
+        setUpdatedStatus("")
+        setUpdatedNIC("")
         handleClose()
         setSeverity('success')
         setAlertMessage('Updated sucessfully')
         setOpenSnackbar(true);
       }).catch((err) => {
-        console.log(err)
-        setSeverity('error')
-        setAlertMessage(err.response.data)
+        console.log(err.response.data)
+        setSeverity('info')
+        setAlertMessage("err.response.data")
         setOpenSnackbar(true);
         if (err.response.status === 401) {
           navigate('/')
@@ -189,37 +251,42 @@ const TrainManagement = () => {
   }
 
   const handleAdd = () => {
-    console.log(selectedTrain)
-    axios.post(`https://localhost:7064/api/trains`, {
-      trainName: newTrainName,
-      scheduleDateTime: newTrainScheduleDateTime,
-      seatsCount: parseInt(newTrainSeatCount),
-      from: newTrainFrom,
-      to: newTrainTo,
-    })
-      .then((response) => {
-        setNewTrainName('')
-        setNewTrainScheduleDateTime('')
-        setNewTrainSeatCount('')
-        setNewTrainFrom('')
-        setNewTrainTo('')
-        handleAddClose()
-        setSeverity('success')
-        setAlertMessage('Added sucessfully')
-        setOpenSnackbar(true);
-      }).catch((err) => {
-        console.log(err)
-        setSeverity('error')
-        setAlertMessage(err.response.data.errors.train)
-        setOpenSnackbar(true);
-        if (err.response.status === 401) {
-          navigate('/')
-        }
+    const available = availableSeats()
+    if (available < reserveSeatCount) {
+      setSeverity('info')
+      setAlertMessage(`Sorry! maximum available seat count is ${available}`)
+      setOpenSnackbar(true);
+    }
+    else {
+      axios.post(`https://localhost:7064/api/reservation`, {
+        userID: reserveUserId,
+        trainID: reservationTrainId,
+        nic: reserveNic,
+        trainName: train.trainName,
+        reservationDate: reservationDateAndTime,
+        noOfSeates: parseInt(reserveSeatCount),
+        status: true
+
       })
+        .then((response) => {
+          handleAddClose()
+          setSeverity('success')
+          setAlertMessage('Reserved sucessfully')
+          setOpenSnackbar(true);
+        }).catch((err) => {
+          console.log(err.response.data)
+          setSeverity('error')
+          setAlertMessage(err.response.data)
+          setOpenSnackbar(true);
+          if (err.response.status === 401) {
+            navigate('/')
+          }
+        })
+    }
   }
 
   const handleDelete = () => {
-    axios.delete(`https://localhost:7064/api/trains/${deleteId}`)
+    axios.delete(`https://localhost:7064/api/reservation/${deleteId}`)
       .then((response) => {
         setDeleteId(false)
         handleCloseDelete()
@@ -236,11 +303,36 @@ const TrainManagement = () => {
       })
   }
 
+  const editReservationStatus = (reservation) => {
+    reservation.status = !reservation.status
+    console.log(reservation)
+    axios.put(`https://localhost:7064/api/reservation/${reservation.id}`, {
+      id: reservation.id,
+      userID: reservation.userID,
+      trainID: reservation.trainID,
+      trainName: reservation.trainName,
+      nic: reservation.nic,
+      reservationDate: reservation.reservationDate,
+      noOfSeates: parseInt(reservation.noOfSeates),
+      status: reservation.status
+    }).then((res) => {
+      setSeverity('success')
+      setAlertMessage(`reservation has been ${reservation.status ? " in active" : "deacivate"} state`)
+      setOpenSnackbar(true);
+    }).catch((err) => {
+      reservation.status = !reservation.status
+      console.log(err)
+      setSeverity('error')
+      setAlertMessage(err.response.data)
+      setOpenSnackbar(true);
+    })
+  }
+
   return (
     <Box>
-      <Button sx={{ mt:'30px', ml:'30px',color: 'white', textTransform: 'capitalize', backgroundColor:'black', ':hover': { backgroundColor: '#90EE90'} }}
-        onClick={() => handleClickAddOpen()}>
-        Add new train
+      <Button sx={{ mt: '30px', ml: '30px', color: 'white', textTransform: 'capitalize', backgroundColor: 'black', ':hover': { backgroundColor: '#90EE90' } }}
+        onClick={() => navigate('/train')}>
+        Reserve seats
       </Button>
       <DescriptionAlerts openSnackbar={openSnackbar} handleCloseSnackbar={handleCloseSnackbar} severity={severity} alertMessage={alertMessage} />
       <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', mt: '30px', mb: '30px', ml: '30px', mr: '30px' }}>
@@ -248,40 +340,52 @@ const TrainManagement = () => {
           <Table sx={{ minWidth: 700 }} aria-label="customized table">
             <TableHead>
               <TableRow>
+                {/* <StyledTableCell align="left">UserID</StyledTableCell>
+                <StyledTableCell align="left">TrainID</StyledTableCell> */}
                 <StyledTableCell>TrainName</StyledTableCell>
-                <StyledTableCell align="left">ScheduleDateTime</StyledTableCell>
-                <StyledTableCell align="left">SeatsCount</StyledTableCell>
-                <StyledTableCell align="left">From</StyledTableCell>
-                <StyledTableCell align="left">To</StyledTableCell>
+                <StyledTableCell align="left">NIC</StyledTableCell>
+                <StyledTableCell align="left">ReservationDate</StyledTableCell>
+                <StyledTableCell align="left">noOfSeates</StyledTableCell>
                 <StyledTableCell align="left">Status</StyledTableCell>
+                <StyledTableCell align="left">Edit</StyledTableCell>
                 <StyledTableCell align="letf">Delete</StyledTableCell>
               </TableRow>
             </TableHead>
             <TableBody>
-              {trains.map((train) => (
-                <StyledTableRow key={train.id} sx={{
+              {reservations.map((reservation) => (
+                <StyledTableRow key={reservation.id} sx={{
                   ":hover": { backgroundColor: '#666' }, "&.custom-row": {
+                    backgroundColor: reservation.status ? '#90EE90' : '#FF5733',
                   },
                 }}
                   className="custom-row">
-                  <StyledTableCell component="th" scope="row">
-                    {train.trainName}
+                  {/* <StyledTableCell component="th" scope="row">
+                    {reservation.userID}
                   </StyledTableCell>
                   <StyledTableCell component="th" scope="row">
-                    {train.scheduleDateTime}
+                    {reservation.trainID}
+                  </StyledTableCell> */}
+                  <StyledTableCell component="th" scope="row">
+                    {reservation.trainName}
                   </StyledTableCell>
                   <StyledTableCell component="th" scope="row">
-                    {train.seatsCount}
+                    {reservation.nic}
                   </StyledTableCell>
                   <StyledTableCell component="th" scope="row">
-                    {train.from}
+                    {reservation.reservationDate}
                   </StyledTableCell>
                   <StyledTableCell component="th" scope="row">
-                    {train.to}
+                    {reservation.noOfSeates}
                   </StyledTableCell>
                   <StyledTableCell component="th" scope="row">
                     <Button sx={{ color: 'black', textTransform: 'capitalize', ':hover': { backgroundColor: 'black', color: 'white' } }}
-                      onClick={() => editButtonClicked(train)}>
+                      onClick={() => editReservationStatus(reservation)}>
+                      <ChangeCircleIcon />
+                    </Button>
+                  </StyledTableCell>
+                  <StyledTableCell component="th" scope="row">
+                    <Button sx={{ color: 'black', textTransform: 'capitalize', ':hover': { backgroundColor: 'black', color: 'white' } }}
+                      onClick={() => editButtonClicked(reservation)}>
                       <EditIcon />
                     </Button>
                   </StyledTableCell>
@@ -293,7 +397,7 @@ const TrainManagement = () => {
                       backgroundColor: 'black',
                       color: 'white'
                     }
-                  }} onClick={() => deleteButtonClicked(train.id)} /></StyledTableCell>
+                  }} onClick={() => deleteButtonClicked(reservation.id)} /></StyledTableCell>
                 </StyledTableRow>
               ))}
             </TableBody>
@@ -304,7 +408,7 @@ const TrainManagement = () => {
 
       <Box>
         <Dialog open={open} onClose={handleClose}>
-          <DialogTitle sx={{ backgroundColor: 'black', color: 'white', textAlign: 'center' }}>Update Train</DialogTitle>
+          <DialogTitle sx={{ backgroundColor: 'black', color: 'white', textAlign: 'center' }}>Update Reservation</DialogTitle>
           <DialogContent sx={{ mt: '10px' }}>
             <DialogContentText >
               <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
@@ -316,64 +420,74 @@ const TrainManagement = () => {
               </Box>
             </DialogContentText>
             <TextField
+              defaultValue={selectedReservation.trainID}
+              disabled={true}
               autoFocus
               margin="dense"
               id="name"
-              label="Train name"
+              label="Train Id"
               type="text"
               fullWidth
               variant="standard"
-              defaultValue={updatedName}
-              onChange={handleUpdatedName}
+            />
+            <TextField
+              defaultValue={selectedReservation.trainName}
+              disabled={true}
+              autoFocus
+              margin="dense"
+              id="name"
+              label="Train Name"
+              type="text"
+              fullWidth
+              variant="standard"
             />
             <LocalizationProvider dateAdapter={AdapterDayjs}>
               <DemoContainer
                 components={['DateTimePicker', 'DateTimePicker', 'DateTimePicker']}
               >
                 <DemoItem
-                  label="Pick the date and time"
+                  label="Scheduled Time"
                 >
                   <DateTimePicker
-                    defaultValue={dayjs(updatedScheduleDateTime)}
-                    onChange={(newDate) => handleScheduleDateTime((newDate))}
+                    disabled={true}
+                    defaultValue={dayjs(selectedReservation.reservationDate)}
                     views={['year', 'month', 'day', 'hours', 'minutes', 'seconds']}
                   />
                 </DemoItem>
               </DemoContainer>
             </LocalizationProvider>
-
+            <TextField
+              disabled={true}
+              autoFocus
+              margin="dense"
+              id="email"
+              label="User Id"
+              type="text"
+              fullWidth
+              variant="standard"
+              defaultValue={selectedReservation.userID}
+            />
             <TextField
               autoFocus
               margin="dense"
               id="email"
-              label="Seat count"
-              type="text"
+              label={"number of seats (Available seat : " + updatedAvailableSeat() + ")"}
+              type='number'
               fullWidth
               variant="standard"
               defaultValue={updatedSeatsCount}
-              onChange={handleSeatCount}
+              onChange={(e) => { setUpdatedSeatsCount(e.target.value) }}
             />
             <TextField
               autoFocus
               margin="dense"
               id="email"
-              label="From"
+              label="Traveler NIC"
               type="text"
               fullWidth
               variant="standard"
-              defaultValue={updatedFrom}
-              onChange={handleFrom}
-            />
-            <TextField
-              autoFocus
-              margin="dense"
-              id="email"
-              label="To"
-              type="text"
-              fullWidth
-              variant="standard"
-              defaultValue={updatedTo}
-              onChange={handleTo}
+              defaultValue={updatedNIC}
+              onChange={(e) => { setUpdatedNIC(e.target.value) }}
             />
           </DialogContent>
           <DialogActions>
@@ -407,7 +521,7 @@ const TrainManagement = () => {
 
       <Box>
         <Dialog open={AddOpen} onClose={handleAddClose}>
-          <DialogTitle sx={{ backgroundColor: 'black', color: 'white', textAlign: 'center' }}>Add New Train</DialogTitle>
+          <DialogTitle sx={{ backgroundColor: 'black', color: 'white', textAlign: 'center' }}>Add New Reservation</DialogTitle>
           <DialogContent sx={{ mt: '10px' }}>
             <DialogContentText >
               <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
@@ -419,59 +533,76 @@ const TrainManagement = () => {
               </Box>
             </DialogContentText>
             <TextField
+              defaultValue={reservationTrainId}
+              disabled={true}
               autoFocus
               margin="dense"
               id="name"
-              label="Train name"
+              label="Train Id"
               type="text"
               fullWidth
               variant="standard"
-              onChange={(e)=>{setNewTrainName(e.target.value)}}
+              onChange={(e) => { setReservationTrainId(e.target.value) }}
+            />
+            <TextField
+              defaultValue={train.trainName}
+              disabled={true}
+              autoFocus
+              margin="dense"
+              id="name"
+              label="Train Name"
+              type="text"
+              fullWidth
+              variant="standard"
             />
             <LocalizationProvider dateAdapter={AdapterDayjs}>
               <DemoContainer
                 components={['DateTimePicker', 'DateTimePicker', 'DateTimePicker']}
               >
                 <DemoItem
-                  label="Pick the date and time"
+                  label="Scheduled Time"
                 >
                   <DateTimePicker
+                    disabled={true}
+                    defaultValue={dayjs(reservationDateAndTime)}
                     onChange={(newDate) => handleNewTrainScheduleDateTime((newDate))}
                     views={['year', 'month', 'day', 'hours', 'minutes', 'seconds']}
                   />
                 </DemoItem>
               </DemoContainer>
             </LocalizationProvider>
-
             <TextField
+              disabled={true}
               autoFocus
               margin="dense"
               id="email"
-              label="Seat count"
+              label="User Id"
               type="text"
               fullWidth
               variant="standard"
-              onChange={(e)=>{setNewTrainSeatCount(e.target.value)}}
+              defaultValue={reserveUserId}
+              onChange={(e) => { setReserveUserId(e.target.value) }}
             />
             <TextField
               autoFocus
               margin="dense"
               id="email"
-              label="From"
-              type="text"
+              label={"number of seats (Available seat : " + availableSeats() + ")"}
+              type='number'
               fullWidth
               variant="standard"
-              onChange={(e)=>{setNewTrainFrom(e.target.value)}}
+              defaultValue={reserveSeatCount}
+              onChange={(e) => { setReserveSeatCount(e.target.value) }}
             />
             <TextField
               autoFocus
               margin="dense"
               id="email"
-              label="To"
+              label="Traveler NIC"
               type="text"
               fullWidth
               variant="standard"
-              onChange={(e)=>{setNewTrainTo(e.target.value)}}
+              onChange={(e) => { setReserveNic(e.target.value) }}
             />
           </DialogContent>
           <DialogActions>
@@ -485,7 +616,7 @@ const TrainManagement = () => {
                   color: 'white',
                   cursor: 'pointer'
                 },
-              }} onClick={handleClose}>Cancel</Button>
+              }} onClick={handleAddClose}>Cancel</Button>
             <Button
               sx={{
                 backgroundColor: 'black',

@@ -166,6 +166,7 @@ const UserManagement = () => {
       setAlertMessage(`Account has been ${user.isActive ? "activated" : "deacivated"} successfully`)
       setOpenSnackbar(true);
     }).catch((err) => {
+      user.isActive = !user.isActive
       setSeverity('error')
       setAlertMessage(err.response.data)
       setOpenSnackbar(true);

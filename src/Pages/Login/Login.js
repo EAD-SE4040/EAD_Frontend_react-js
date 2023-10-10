@@ -57,8 +57,7 @@ axios.post('/user/login', {
             setSeverity('success')
             setAlertMessage(`Welcome ${response.data.name}`)
             setOpenSnackbar(true);
-            const isLogin= true
-            localStorage.setItem("Login", isLogin);
+            localStorage.setItem("user",JSON.stringify(response.data))
 
             setUser({
                 isAuthenticated: true,

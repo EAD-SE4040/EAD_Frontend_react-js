@@ -18,6 +18,8 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
 import dayjs from 'dayjs';
+import AddCircleIcon from '@mui/icons-material/AddCircle';
+import { useUser } from '../../Components/commonData';
 
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
@@ -41,6 +43,8 @@ const StyledTableRow = styled(TableRow)(({ theme }) => ({
 }));
 
 const TrainManagement = () => {
+
+  const {setTrain} = useUser();
   const navigate = useNavigate()
   const [open, setOpen] = useState(false);
   const [AddOpen, setAddOpen] = useState(false);
@@ -236,6 +240,19 @@ const TrainManagement = () => {
       })
   }
 
+  const reserveButtonClicked =  (train) =>{
+    setTrain({
+      isCreateTrain:true,
+      id:train.id,
+      trainName: train.trainName,
+      scheduleDateTime: train.scheduleDateTime,
+      seatsCount: train.seatsCount,
+      from: train.from,
+      to: train.to
+    })
+    navigate('/reservation')
+  }
+
   return (
     <Box>
       <Button sx={{ mt:'30px', ml:'30px',color: 'white', textTransform: 'capitalize', backgroundColor:'black', ':hover': { backgroundColor: '#90EE90'} }}
@@ -253,7 +270,8 @@ const TrainManagement = () => {
                 <StyledTableCell align="left">SeatsCount</StyledTableCell>
                 <StyledTableCell align="left">From</StyledTableCell>
                 <StyledTableCell align="left">To</StyledTableCell>
-                <StyledTableCell align="left">Status</StyledTableCell>
+                <StyledTableCell align="letf">Reserve</StyledTableCell>
+                <StyledTableCell align="left">Edit</StyledTableCell>
                 <StyledTableCell align="letf">Delete</StyledTableCell>
               </TableRow>
             </TableHead>
@@ -278,6 +296,12 @@ const TrainManagement = () => {
                   </StyledTableCell>
                   <StyledTableCell component="th" scope="row">
                     {train.to}
+                  </StyledTableCell>
+                  <StyledTableCell component="th" scope="row">
+                    <Button sx={{ color: 'black', textTransform: 'capitalize', ':hover': { backgroundColor: 'black', color: 'white' } }}
+                      onClick={() => reserveButtonClicked(train)}>
+                      <AddCircleIcon />
+                    </Button>
                   </StyledTableCell>
                   <StyledTableCell component="th" scope="row">
                     <Button sx={{ color: 'black', textTransform: 'capitalize', ':hover': { backgroundColor: 'black', color: 'white' } }}

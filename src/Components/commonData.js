@@ -11,11 +11,21 @@ export function UserProvider({ children }) {
     nic:'',
     phone:'',
     userType:'',
-    isActive:''
+    isActive:'',
   });
 
+  const[train,setTrain] = useState({
+    isCreateTrain:false,
+    id: "",
+    trainName: "",
+    scheduleDateTime: "",
+    seatsCount: "",
+    from: "",
+    to: ""
+  })
+
   return (
-    <UserContext.Provider value={{ user, setUser }}>
+    <UserContext.Provider value={{ user, setUser, train, setTrain}}>
       {children}
     </UserContext.Provider>
   );

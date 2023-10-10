@@ -11,6 +11,7 @@ import { useUser } from "../commonData";
 
 function SideMenu() {
   const {user, setUser} = useUser()
+  const userData = JSON.parse(localStorage.getItem('user'))
   const location = useLocation();
   const [selectedKeys, setSelectedKeys] = useState("/");
 
@@ -38,8 +39,8 @@ function SideMenu() {
               userType:'',
               isActive:''
             });
-            const isLogin= false
-            localStorage.setItem("Login", isLogin);
+            localStorage.removeItem("user");
+            localStorage.removeItem("Login");
           }
           navigate(item.key);
         }}
@@ -59,7 +60,7 @@ function SideMenu() {
             label: "User management",
             key: "/user",
             icon: <UserOutlined />,
-            hidden: user.userType === "traveler agent" || user.userType === "Traveler agent",
+            hidden: userData.userType === "traveler agent" || userData.userType === "Traveler agent",
           },
           {
             label: "Reservation Management",
