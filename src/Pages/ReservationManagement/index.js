@@ -51,7 +51,6 @@ const ReservationManagement = () => {
     axios.get(`https://localhost:7064/api/user`)
       .then((res) => {
         setUsers(res.data)
-
       })
   }, [])
 
@@ -110,9 +109,9 @@ const ReservationManagement = () => {
     })
       .then((response) => {
         console.log(response)
+        handleClose()
         setNewType('')
         setSelectedUser([])
-        handleClose()
         setSeverity('success')
         setAlertMessage('User Type has been changed successfully')
         setOpenSnackbar(true);
@@ -132,6 +131,7 @@ const ReservationManagement = () => {
         setSeverity('success')
         setAlertMessage('Deleted sucessfully')
         setOpenSnackbar(true);
+        // setTimeout(() => {history.replace("/index");}, 5000);
       }).catch((err) => {
         console.log(err)
         setSeverity('error')
