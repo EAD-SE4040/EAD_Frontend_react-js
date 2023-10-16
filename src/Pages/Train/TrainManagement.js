@@ -68,7 +68,7 @@ const TrainManagement = () => {
 
 
   useEffect(() => {
-    axios.get(`https://localhost:7064/api/trains`)
+    axios.get(`/trains`)
       .then((res) => {
         setTrains(res.data)
       })
@@ -161,7 +161,7 @@ const TrainManagement = () => {
 
   const handleUpdate = () => {
     console.log(selectedTrain)
-    axios.put(`https://localhost:7064/api/trains/${selectedTrain.id}`, {
+    axios.put(`/trains/${selectedTrain.id}`, {
       id: selectedTrain.id,
       trainName: updatedName,
       scheduleDateTime: updatedScheduleDateTime,
@@ -181,6 +181,9 @@ const TrainManagement = () => {
         setSeverity('success')
         setAlertMessage('Updated sucessfully')
         setOpenSnackbar(true);
+        setTimeout(() => {
+          window.location.reload();
+        }, 500);
       }).catch((err) => {
         console.log(err)
         setSeverity('error')
@@ -194,7 +197,7 @@ const TrainManagement = () => {
 
   const handleAdd = () => {
     console.log(selectedTrain)
-    axios.post(`https://localhost:7064/api/trains`, {
+    axios.post(`/trains`, {
       trainName: newTrainName,
       scheduleDateTime: newTrainScheduleDateTime,
       seatsCount: parseInt(newTrainSeatCount),
@@ -211,6 +214,9 @@ const TrainManagement = () => {
         setSeverity('success')
         setAlertMessage('Added sucessfully')
         setOpenSnackbar(true);
+        setTimeout(() => {
+          window.location.reload();
+        }, 500);
       }).catch((err) => {
         console.log(err)
         setSeverity('error')
@@ -223,13 +229,16 @@ const TrainManagement = () => {
   }
 
   const handleDelete = () => {
-    axios.delete(`https://localhost:7064/api/trains/${deleteId}`)
+    axios.delete(`/trains/${deleteId}`)
       .then((response) => {
         setDeleteId(false)
         handleCloseDelete()
         setSeverity('success')
         setAlertMessage('Deleted sucessfully')
         setOpenSnackbar(true);
+        setTimeout(() => {
+          window.location.reload();
+        }, 500);
       }).catch((err) => {
         setSeverity('error')
         setAlertMessage(err.response.data)

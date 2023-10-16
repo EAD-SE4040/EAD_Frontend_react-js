@@ -3,6 +3,7 @@ import {
   LogoutOutlined,
   ShoppingCartOutlined,
   UserOutlined,
+  ShoppingOutlined
 } from "@ant-design/icons";
 import { Menu } from "antd";
 import { useEffect, useState } from "react";
@@ -65,7 +66,7 @@ function SideMenu() {
           {
             label: "Reservation Management",
             key: "/reservation",
-            icon: <UserOutlined />,
+            icon: <ShoppingOutlined />,
           },
           {
             label: "Logout",

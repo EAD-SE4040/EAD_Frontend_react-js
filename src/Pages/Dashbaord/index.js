@@ -1,12 +1,10 @@
 import {
-  DollarCircleOutlined,
   ShoppingCartOutlined,
   ShoppingOutlined,
   UserOutlined,
 } from "@ant-design/icons";
 import { Card, Space, Statistic, Table, Typography } from "antd";
 import { useEffect, useState } from "react";
-import { getCustomers, getInventory, getOrders, getRevenue } from "../../API";
 
 import {
   Chart as ChartJS,
@@ -30,16 +28,31 @@ ChartJS.register(
 );
 
 function Dashboard() {
-  const [orders, setOrders] = useState(0);
-  const [inventory, setInventory] = useState(0);
-  const [customers, setCustomers] = useState(0);
-  const [revenue, setRevenue] = useState(0);
+  const [trains, setTrains] = useState(0);
+  const [reservations, setReservations] = useState(0);
+  const [users, setUsers] = useState(0);
 
   useEffect(() => {
 
     axios.get("/user")
       .then(res => {
-        // console.log("user", res.data)
+        setUsers(res.data)
+      })
+      .catch(err => {
+        console.log("Error", err)
+      })
+    
+      axios.get("/trains")
+      .then(res => {
+        setTrains(res.data)
+      })
+      .catch(err => {
+        console.log("Error", err)
+      })
+    
+      axios.get("/reservation")
+      .then(res => {
+        setReservations(res.data)
       })
       .catch(err => {
         console.log("Error", err)
@@ -63,8 +76,8 @@ function Dashboard() {
               }}
             />
           }
-          title={"Orders"}
-          value={orders}
+          title={"Trains"}
+          value={trains.length}
         />
         <DashboardCard
           icon={
@@ -78,8 +91,8 @@ function Dashboard() {
               }}
             />
           }
-          title={"Inventory"}
-          value={inventory}
+          title={"Reservations"}
+          value={reservations.length}
         />
         <DashboardCard
           icon={
@@ -93,23 +106,8 @@ function Dashboard() {
               }}
             />
           }
-          title={"Customer"}
-          value={customers}
-        />
-        <DashboardCard
-          icon={
-            <DollarCircleOutlined
-              style={{
-                color: "red",
-                backgroundColor: "rgba(255,0,0,0.25)",
-                borderRadius: 20,
-                fontSize: 24,
-                padding: 8,
-              }}
-            />
-          }
-          title={"Revenue"}
-          value={revenue}
+          title={"Users"}
+          value={users.length}
         />
       </Space>
       <Space>
@@ -136,28 +134,28 @@ function RecentOrders() {
 
   useEffect(() => {
     setLoading(true);
-    getOrders().then((res) => {
-      setDataSource(res.products.splice(0, 3));
+    axios.get("/reservation").then((res) => {
+      setDataSource(res.data.slice(-3));
       setLoading(false);
     });
   }, []);
 
   return (
     <>
-      <Typography.Text>Recent Orders</Typography.Text>
+      <Typography.Text>Last Three Reservations</Typography.Text>
       <Table
         columns={[
           {
-            title: "Title",
-            dataIndex: "title",
+            title: "NIC",
+            dataIndex: "nic",
           },
           {
-            title: "Quantity",
-            dataIndex: "quantity",
+            title: "TrainName",
+            dataIndex: "trainName",
           },
           {
-            title: "Price",
-            dataIndex: "discountedPrice",
+            title: "ReservationDate",
+            dataIndex: "reservationDate",
           },
         ]}
         loading={loading}
@@ -175,19 +173,19 @@ function DashboardChart() {
   });
 
   useEffect(() => {
-    getRevenue().then((res) => {
-      const labels = res.carts.map((cart) => {
-        return `User-${cart.userId}`;
+    axios.get("/reservation").then((res) => {
+      const labels = res.data.map((reservation) => {
+        return `User-NIC:${reservation.nic}`;
       });
-      const data = res.carts.map((cart) => {
-        return cart.discountedTotal;
+      const data = res.data.map((reservation) => {
+        return reservation.noOfSeates;
       });
 
       const dataSource = {
         labels,
         datasets: [
           {
-            label: "Revenue",
+            label: "Reservation",
             data: data,
             backgroundColor: "rgba(255, 0, 0, 1)",
           },
@@ -206,7 +204,7 @@ function DashboardChart() {
       },
       title: {
         display: true,
-        text: "Order Revenue",
+        text: "The count of reserved seats based on NIC.",
       },
     },
   };

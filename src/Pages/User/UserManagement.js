@@ -48,7 +48,7 @@ const UserManagement = () => {
   const [users, setUsers] = useState([])
 
   useEffect(() => {
-    axios.get(`https://localhost:7064/api/user`)
+    axios.get(`/user`)
       .then((res) => {
         setUsers(res.data)
       }).catch((err)=>{
@@ -101,7 +101,7 @@ const UserManagement = () => {
   }
 
   const handleUpdate = () => {
-    axios.put(`https://localhost:7064/api/user/${selectedUser.id}`, {
+    axios.put(`/user/${selectedUser.id}`, {
       id: selectedUser.id,
       name: selectedUser.name,
       password: selectedUser.password,
@@ -119,6 +119,9 @@ const UserManagement = () => {
         setSeverity('success')
         setAlertMessage('User Type has been changed successfully')
         setOpenSnackbar(true);
+        setTimeout(() => {
+          window.location.reload();
+        }, 500);
       }).catch((err) => {
         console.log(err)
         setSeverity('error')
@@ -131,13 +134,16 @@ const UserManagement = () => {
   }
 
   const handleDelete = () => {
-    axios.delete(`https://localhost:7064/api/user/${deleteId}`)
+    axios.delete(`/user/${deleteId}`)
       .then((response) => {
         setDeleteId(false)
         handleCloseDelete()
         setSeverity('success')
         setAlertMessage('Deleted sucessfully')
         setOpenSnackbar(true);
+        setTimeout(() => {
+          window.location.reload();
+        }, 500);
       }).catch((err) => {
         console.log(err)
         setSeverity('error')
@@ -152,7 +158,7 @@ const UserManagement = () => {
   const editUserStatus = (user) => {
     user.isActive = !user.isActive
     console.log(user)
-    axios.put(`https://localhost:7064/api/user/${user.id}`, {
+    axios.put(`/user/${user.id}`, {
       id: user.id,
       name: user.name,
       password: user.password,
@@ -165,6 +171,9 @@ const UserManagement = () => {
       setSeverity('success')
       setAlertMessage(`Account has been ${user.isActive ? "activated" : "deacivated"} successfully`)
       setOpenSnackbar(true);
+      setTimeout(() => {
+        window.location.reload();
+      }, 500);
     }).catch((err) => {
       user.isActive = !user.isActive
       setSeverity('error')

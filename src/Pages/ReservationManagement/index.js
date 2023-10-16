@@ -69,7 +69,7 @@ const TrainManagement = () => {
   const [bookedSeatCount, setBookedSeatCount] = useState('')
 
   useEffect(() => {
-    axios.get(`https://localhost:7064/api/reservation`)
+    axios.get(`/reservation`)
       .then((res) => {
         setReservations(res.data)
       }, [])
@@ -217,7 +217,7 @@ const TrainManagement = () => {
     //   setOpenSnackbar(true);
     // }
     console.log(selectedReservation)
-    axios.put(`https://localhost:7064/api/reservation/${selectedReservation.id}`, {
+    axios.put(`/reservation/${selectedReservation.id}`, {
       id:selectedReservation.id,
       userID: selectedReservation.userID,
       trainID: selectedReservation.trainID,
@@ -239,6 +239,9 @@ const TrainManagement = () => {
         setSeverity('success')
         setAlertMessage('Updated sucessfully')
         setOpenSnackbar(true);
+        setTimeout(() => {
+          window.location.reload();
+        }, 500);
       }).catch((err) => {
         console.log(err.response.data)
         setSeverity('info')
@@ -258,7 +261,7 @@ const TrainManagement = () => {
       setOpenSnackbar(true);
     }
     else {
-      axios.post(`https://localhost:7064/api/reservation`, {
+      axios.post(`/reservation`, {
         userID: reserveUserId,
         trainID: reservationTrainId,
         nic: reserveNic,
@@ -273,6 +276,9 @@ const TrainManagement = () => {
           setSeverity('success')
           setAlertMessage('Reserved sucessfully')
           setOpenSnackbar(true);
+          setTimeout(() => {
+            window.location.reload();
+          }, 500);
         }).catch((err) => {
           console.log(err.response.data)
           setSeverity('error')
@@ -286,13 +292,16 @@ const TrainManagement = () => {
   }
 
   const handleDelete = () => {
-    axios.delete(`https://localhost:7064/api/reservation/${deleteId}`)
+    axios.delete(`/reservation/${deleteId}`)
       .then((response) => {
         setDeleteId(false)
         handleCloseDelete()
         setSeverity('success')
         setAlertMessage('Deleted sucessfully')
         setOpenSnackbar(true);
+        setTimeout(() => {
+          window.location.reload();
+        }, 500);
       }).catch((err) => {
         setSeverity('error')
         setAlertMessage(err.response.data)
@@ -306,7 +315,7 @@ const TrainManagement = () => {
   const editReservationStatus = (reservation) => {
     reservation.status = !reservation.status
     console.log(reservation)
-    axios.put(`https://localhost:7064/api/reservation/${reservation.id}`, {
+    axios.put(`/reservation/${reservation.id}`, {
       id: reservation.id,
       userID: reservation.userID,
       trainID: reservation.trainID,
@@ -319,6 +328,9 @@ const TrainManagement = () => {
       setSeverity('success')
       setAlertMessage(`reservation has been ${reservation.status ? " in active" : "deacivate"} state`)
       setOpenSnackbar(true);
+      setTimeout(() => {
+        window.location.reload();
+      }, 500);
     }).catch((err) => {
       reservation.status = !reservation.status
       console.log(err)
