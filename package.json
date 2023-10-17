@@ -2,7 +2,7 @@
   "name": "antd-demo",
   "version": "0.1.0",
   "private": true,
-  "proxy": "https://localhost:7064/api",
+  "proxy": "https://localhost:8003/api",
   "dependencies": {
     "@ant-design/icons": "^4.8.0",
     "@emotion/react": "^11.11.1",
